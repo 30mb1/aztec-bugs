@@ -73,5 +73,11 @@ export class TestContract extends ContractBase {
 
     /** test_get() */
     test_get: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** test_get2() */
+    test_get2: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** test2() */
+    test2: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
   };
 }

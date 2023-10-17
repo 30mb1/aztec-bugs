@@ -31,11 +31,11 @@ describe('ZK Contract Tests', () => {
   let owner: AccountWalletWithPrivateKey
   let _account2: AccountWalletWithPrivateKey
   let _account3: AccountWalletWithPrivateKey
-  let vaultAddress: AztecAddress
+  let testAddress: AztecAddress
   let contractAddress: AztecAddress
   let pxe: PXE;
 
-  async function getVault(wallet: AccountWalletWithPrivateKey, address: AztecAddress) {
+  async function getTest(wallet: AccountWalletWithPrivateKey, address: AztecAddress) {
     return TestContract.at(address, wallet);
   }
 
@@ -48,23 +48,29 @@ describe('ZK Contract Tests', () => {
     });
 
     it('Deploy test', async function() {
-      const vault = await TestContract.deploy(pxe).send().deployed();
-      vaultAddress = vault.address;
-      console.log(vaultAddress.toString())
+      const test = await TestContract.deploy(pxe).send().deployed();
+      testAddress = test.address;
+      console.log(testAddress.toString())
     });
   });
 
   describe('Test', async() => {
-    it('Open position',async () => {
-      const vault = await getVault(owner, vaultAddress);
+    it('Testing',async () => {
+      const vault = await getTest(owner, testAddress);
 
       const tx0 = await vault.methods.test().send().wait();
       console.log(tx0);
 
+      const tx1 = await vault.methods.test2().send().wait();
+      console.log(tx1);
+
       await delay(5000);
 
-      const res = await vault.methods.test_get().view();
-      console.log(res);
+      const res0 = await vault.methods.test_get().view();
+      console.log(res0);
+
+      const res1 = await vault.methods.test_get2().view();
+      console.log(res1);
       return;
     });
   });

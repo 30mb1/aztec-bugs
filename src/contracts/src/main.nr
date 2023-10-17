@@ -1,5 +1,5 @@
 mod test_note;
-
+mod position;
 
 
 contract Test {
@@ -34,15 +34,18 @@ contract Test {
     };
 
     use crate::test_note::{TestNote, TEST_NOTE_SERIALIZED_LEN, TestNoteSerializationMethods};
+    use crate::position::{Position, PositionSerializationMethods, POSITION_SERIALIZED_LEN};
 
     struct Storage {
-        test: Singleton<TestNote, TEST_NOTE_SERIALIZED_LEN>
+        test: Singleton<TestNote, TEST_NOTE_SERIALIZED_LEN>,
+        test2: Singleton<Position, POSITION_SERIALIZED_LEN>
     }
 
     impl Storage {
         fn init(context: Context) -> pub Self {
             Storage {
-                test: Singleton::new(context, 1, TestNoteSerializationMethods)
+                test: Singleton::new(context, 1, TestNoteSerializationMethods),
+                test2: Singleton::new(context, 2, PositionSerializationMethods)
             }
         }
     }
@@ -65,14 +68,50 @@ contract Test {
         1
     }
 
+    #[aztec(private)]
+    fn test2() {
+        let sender = context.msg_sender();
+        let mut position = Position::new(
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1000000000,
+            1000,
+            1,
+            sender
+        );
+        storage.test2.initialize(&mut position, Option::some(sender));
+        emit_encrypted_log(
+            &mut context,
+            context.this_address(),
+            storage.test2.storage_slot,
+            get_public_key(sender),
+            position.serialize()
+        );
+        1
+    }
+
     unconstrained fn test_get() -> TestNote {
         storage.test.get_note()
     }
 
+    unconstrained fn test_get2() -> Position {
+        storage.test2.get_note()
+    }
 
-    unconstrained fn compute_note_hash_and_nullifier(contract_address: Field, nonce: Field, storage_slot: Field, preimage: [Field; TEST_NOTE_SERIALIZED_LEN]) -> [Field; 4] {
+
+    unconstrained fn compute_note_hash_and_nullifier(contract_address: Field, nonce: Field, storage_slot: Field, preimage: [Field; POSITION_SERIALIZED_LEN]) -> [Field; 4] {
         let note_header = NoteHeader::new(contract_address, nonce, storage_slot);
-        note_utils::compute_note_hash_and_nullifier(TestNoteSerializationMethods, note_header, preimage)
+        if (storage_slot == 1) {
+            note_utils::compute_note_hash_and_nullifier(TestNoteSerializationMethods, note_header, preimage)
+        } else {
+            note_utils::compute_note_hash_and_nullifier(PositionSerializationMethods, note_header, preimage)
+        }
     }
 }
 
